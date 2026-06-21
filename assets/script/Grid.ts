@@ -2,6 +2,7 @@ import { _decorator, Color, Component, EventTouch, Graphics, Input, instantiate,
 const { ccclass, property } = _decorator;
 import{MatchEngine} from './MatchEngine'
 import { Box } from './Box';
+import { Position } from './types';
 @ccclass('Grid')
 export class Grid extends Component {
     atlasPath: string = 'ui/img'; // 必须是字符串路径
@@ -16,6 +17,7 @@ export class Grid extends Component {
         
         this.drawGrid();
         this.generateBox();
+        this.registerTouchEvents();
     }
     private registerTouchEvents() {
         // Cocos Creator 触摸事件
@@ -26,16 +28,24 @@ export class Grid extends Component {
     }
     private onTouchStart(event: EventTouch) {
         if (!this.engine) return;
-
+        let worldPos = this.node.worldPosition;
+        console.log("世界坐标: ", worldPos.x, worldPos.y, worldPos.z);
         // 获取触摸位置对应的格子
-        // const location = event.getUILocation();
-        // const pos = this.getGridPosition(location.x, location.y);
-        // if (!pos) return;
-
+        const location = event.getUILocation();
+        const pos = this.getGridPosition(location.x, location.y);
+        if (!pos) return;
+        console.log("对应坐标",pos.row,pos.col);
         // this.isDragging = true;
         // this.startPos.set(location.x, location.y);
         
         // this.engine.onTileTouchStart(pos.row, pos.col);
+    }
+    getGridPosition(x:number,y:number):Position{
+        let pos:Position={row:0,col:0};
+        console.log("对应坐标",x,y);
+        pos.row=Math.floor(y/this.gridSize);
+        pos.col=Math.floor(x/this.gridSize);
+        return pos;
     }
     generateBox(){
         this.engine=new MatchEngine(this.row,this.col);
