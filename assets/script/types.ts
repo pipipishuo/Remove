@@ -10,6 +10,16 @@ export class Tile{
         // 什么都没做
     }
 };
+export class AnimationData{
+    node:Node
+    targetPos:Vec3
+    originPos:Vec3
+    costTime:number=0
+    duration:number=1
+    constructor() {
+        // 什么都没做
+    }
+};
 export interface IBoard {
   rows: number;
   cols: number;

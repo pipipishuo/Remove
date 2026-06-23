@@ -2,7 +2,11 @@ import { _decorator, Color, Component, EventTouch, Graphics, Input, instantiate,
 const { ccclass, property } = _decorator;
 import{MatchEngine} from './MatchEngine'
 import { Box } from './Box';
-import { Position } from './types';
+import { AnimationData, Position } from './types';
+enum State{
+    Normal,
+    Animation
+}
 @ccclass('Grid')
 export class Grid extends Component {
     atlasPath: string = 'ui/img'; // 必须是字符串路径
@@ -13,8 +17,11 @@ export class Grid extends Component {
     @property(Prefab)
     gridPrefab: Prefab = null; // 在编辑器中拖入预制体
     engine:MatchEngine=null;
+    animationQueue:AnimationData[];
+    curAnimation:AnimationData=null;
+    state:State=State.Normal;
     start() {
-        
+        this.animationQueue = [];
         this.drawGrid();
         this.generateBox();
         this.registerTouchEvents();
@@ -35,6 +42,13 @@ export class Grid extends Component {
         const pos = this.getGridPosition(location.x, location.y);
         if (!pos) return;
         console.log("对应坐标",pos.row,pos.col);
+        let anima=new AnimationData;
+        let tile=this.engine.grid[pos.row][pos.col];
+        anima.node=tile.node;
+        anima.originPos=new Vec3(tile.node.position.x,tile.node.position.y,0);
+        anima.targetPos=new Vec3(anima.originPos.x+this.gridSize,anima.originPos.y,0);
+        this.animationQueue.push(anima);
+        this.state=State.Animation
         // this.isDragging = true;
         // this.startPos.set(location.x, location.y);
         
@@ -141,6 +155,24 @@ export class Grid extends Component {
         graphics.stroke(); // 执行绘制
     }
     update(deltaTime: number) {
+        if(this.state==State.Animation){
+            if(this.curAnimation==null){
+                this.curAnimation=this.animationQueue.shift();
+            }
+            let originPos=this.curAnimation.originPos;
+            let targetPos=this.curAnimation.targetPos;
+            let len=Math.sqrt(Math.pow(originPos.x-targetPos.x,2)+Math.pow(originPos.y-targetPos.y,2))
+            this.curAnimation.costTime=this.curAnimation.costTime+deltaTime;
+            //console.log("deltaTime",deltaTime,"costTime",this.curAnimation.costTime,"len",len,"originPos.x-targetPos.x",originPos.x-targetPos.x,"originPos.y-targetPos.y",originPos.y-targetPos.y)
+            if(this.curAnimation.costTime>1){
+                this.state=State.Normal
+                this.curAnimation.costTime=0;
+                this.curAnimation=null;
+                return;
+            }
+            let rate=this.curAnimation.costTime/this.curAnimation.duration
+            this.curAnimation.node.setPosition(new Vec3(originPos.x+rate*len,originPos.y+rate*len,0));
+        }
         
     }
 }
