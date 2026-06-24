@@ -2,10 +2,11 @@ import { _decorator, Color, Component, EventTouch, Graphics, Input, instantiate,
 const { ccclass, property } = _decorator;
 import{MatchEngine} from './MatchEngine'
 import { Box } from './Box';
-import { AnimationData, Position } from './types';
+import { Animation, AnimationData,Position, Tile } from './types';
 enum State{
     Normal,
-    Animation
+    firstPress,
+    animation
 }
 @ccclass('Grid')
 export class Grid extends Component {
@@ -17,9 +18,12 @@ export class Grid extends Component {
     @property(Prefab)
     gridPrefab: Prefab = null; // 在编辑器中拖入预制体
     engine:MatchEngine=null;
-    animationQueue:AnimationData[];
-    curAnimation:AnimationData=null;
+    animationQueue:Animation[];
+    curAnimation:Animation=null;
     state:State=State.Normal;
+    firstTile:Tile;
+    secondTile:Tile;
+    recordAnimation:Animation=null;
     start() {
         this.animationQueue = [];
         this.drawGrid();
@@ -33,6 +37,7 @@ export class Grid extends Component {
         // this.node.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
         // this.node.on(Input.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
     }
+    
     private onTouchStart(event: EventTouch) {
         if (!this.engine) return;
         let worldPos = this.node.worldPosition;
@@ -42,13 +47,82 @@ export class Grid extends Component {
         const pos = this.getGridPosition(location.x, location.y);
         if (!pos) return;
         console.log("对应坐标",pos.row,pos.col);
-        let anima=new AnimationData;
-        let tile=this.engine.grid[pos.row][pos.col];
-        anima.node=tile.node;
-        anima.originPos=new Vec3(tile.node.position.x,tile.node.position.y,0);
-        anima.targetPos=new Vec3(anima.originPos.x+this.gridSize,anima.originPos.y,0);
-        this.animationQueue.push(anima);
-        this.state=State.Animation
+       
+        
+        switch (this.state){
+            case State.Normal:{
+                this.recordAnimation=new Animation;
+                this.recordAnimation.data=[];
+                let tile=this.engine.grid[pos.row][pos.col];
+                let animationData=new AnimationData;
+                animationData.node=tile.node;
+                animationData.originPos=new Vec3(tile.node.position.x,tile.node.position.y,0);
+                animationData.ftilePos=pos;
+                this.recordAnimation.data.push(animationData);
+                this.state=State.firstPress;
+                break;
+            }
+            case State.firstPress:{
+                let tile=this.engine.grid[pos.row][pos.col];
+                let dPos=new Vec3(tile.node.position.x,tile.node.position.y,0);
+                let out=new Vec3();
+                let first=this.recordAnimation.data[0];
+                out.y=pos.row-first.ftilePos.row
+                out.x=pos.col-first.ftilePos.col
+                
+                console.log("direct",out.x,out.y)
+                
+                if((out.x==1&&out.y==0)||(out.x==-1&&out.y==0)||(out.x==0&&out.y==1)||(out.x==0&&out.y==-1)){
+                    let second=new AnimationData;
+                    second.node=tile.node;
+                    second.originPos=dPos;
+                    second.ftilePos=pos;
+
+                    first.direct=out.clone();
+                    second.direct=out.clone().multiplyScalar(-1);
+                    
+
+                    second.targetPos=first.originPos;
+                    first.targetPos=second.originPos;
+
+                    this.recordAnimation.data.push(second);
+                    this.animationQueue.push(this.recordAnimation);
+                    if(this.engine.swap(first.ftilePos,second.ftilePos)){
+                        
+                    }else{
+                        //不能交换的话就得复归原位
+                        this.recordAnimation=new Animation;
+                        this.recordAnimation.data=[];
+                        let temp= new AnimationData;
+                        temp.direct=out.clone().multiplyScalar(-1);
+                        temp.node=first.node;
+                        temp.originPos=first.targetPos;
+                        temp.targetPos=first.originPos;
+                        temp.ftilePos=first.ftilePos;
+
+                        this.recordAnimation.data.push(temp);
+                        temp= new AnimationData;
+                        temp.node=second.node;
+                        temp.originPos=second.targetPos;
+                        temp.targetPos=second.originPos;
+                        temp.ftilePos=second.ftilePos;
+                        temp.direct=out.clone();
+                        this.recordAnimation.data.push(temp);
+                        this.animationQueue.push(this.recordAnimation);
+                    }
+                    this.state=State.animation
+                }else{
+                    this.recordAnimation.data.length=0
+                    this.recordAnimation=null
+                    this.state=State.Normal
+                }
+                
+                
+                break;
+            }
+        }
+        
+       
         // this.isDragging = true;
         // this.startPos.set(location.x, location.y);
         
@@ -155,23 +229,37 @@ export class Grid extends Component {
         graphics.stroke(); // 执行绘制
     }
     update(deltaTime: number) {
-        if(this.state==State.Animation){
+        if(this.state==State.animation){
             if(this.curAnimation==null){
                 this.curAnimation=this.animationQueue.shift();
             }
-            let originPos=this.curAnimation.originPos;
-            let targetPos=this.curAnimation.targetPos;
-            let len=Math.sqrt(Math.pow(originPos.x-targetPos.x,2)+Math.pow(originPos.y-targetPos.y,2))
             this.curAnimation.costTime=this.curAnimation.costTime+deltaTime;
-            //console.log("deltaTime",deltaTime,"costTime",this.curAnimation.costTime,"len",len,"originPos.x-targetPos.x",originPos.x-targetPos.x,"originPos.y-targetPos.y",originPos.y-targetPos.y)
-            if(this.curAnimation.costTime>1){
-                this.state=State.Normal
+            for(let i=0;i<this.curAnimation.data.length;i++){
+                let animationData= this.curAnimation.data[i];
+                let opos=animationData.originPos;
+                let tpos=animationData.targetPos;
+                
+                //console.log("deltaTime",deltaTime,"costTime",this.curAnimation.costTime,"len",len,"originPos.x-targetPos.x",originPos.x-targetPos.x,"originPos.y-targetPos.y",originPos.y-targetPos.y)
+                if(this.curAnimation.costTime>this.curAnimation.duration){
+                    
+                    animationData.node.setPosition(animationData.targetPos);
+                    continue;
+                }else{
+                    let rate=this.curAnimation.costTime/this.curAnimation.duration
+                    let len=Math.sqrt(Math.pow(opos.x-tpos.x,2)+Math.pow(opos.y-tpos.y,2));
+                    let direct=animationData.direct;
+                    animationData.node.setPosition(new Vec3(opos.x+direct.x*rate*len,opos.y+direct.y*rate*len,0));
+                }
+                
+                
+            }
+            if(this.curAnimation.costTime>this.curAnimation.duration){
                 this.curAnimation.costTime=0;
                 this.curAnimation=null;
-                return;
+                if(this.animationQueue.length==0){
+                    this.state=State.Normal
+                }
             }
-            let rate=this.curAnimation.costTime/this.curAnimation.duration
-            this.curAnimation.node.setPosition(new Vec3(originPos.x+rate*len,originPos.y+rate*len,0));
         }
         
     }

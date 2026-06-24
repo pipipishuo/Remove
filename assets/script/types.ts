@@ -12,10 +12,15 @@ export class Tile{
 };
 export class AnimationData{
     node:Node
-    targetPos:Vec3
     originPos:Vec3
+    direct:Vec3
+    ftilePos:Position
+    targetPos:Vec3
+}
+export class Animation{
     costTime:number=0
-    duration:number=1
+    duration:number=0.3
+    data:AnimationData[]
     constructor() {
         // 什么都没做
     }
