@@ -37,7 +37,80 @@ export class Grid extends Component {
         // this.node.on(Input.EventType.TOUCH_END, this.onTouchEnd, this);
         // this.node.on(Input.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
     }
-    
+    private checkMatch(){
+        console.log("remove")
+        let remove=new Animation;
+        const matches = this.engine.findAllMatches();
+        for(let i=0;i<matches.length;i++){
+            for(let j=0;j<matches[i].tiles.length;j++){
+                let pos=matches[i].tiles[j];
+                let temp= new Remove;
+                temp.node=this.engine.grid[pos.row][pos.col].node;
+                remove.data.push(temp);
+            }
+        }
+        this.animationQueue.push(remove);
+
+
+        console.log("down")
+        let down=new Animation;
+        this.engine.removeMatches(matches); 
+        //此时待消除方块已被标记为0
+        for(let i=0;i<this.col;i++){
+            let len=0;
+            for(let j=0;j<this.row;j++){
+                if(this.engine.grid[j][i].tileType==0){
+                    len++;
+                }else{
+                    if(len!=0){
+                        console.log("len",len,len*this.gridSize);
+                        let move= new Move;
+                        let tile=this.engine.grid[j][i];
+                        move.setData(tile.node,tile.node.position,{row:j,col:i});
+                        let direct=new Vec3(0,-1,0);
+                        move.setDirect(direct,len*this.gridSize);
+                        remove.data.push(move);
+                    }
+                }
+                
+            }
+
+            //落下来
+            let writeRow = 0; // 从最顶部开始（row=0）
+            // 从顶部向下遍历
+            for (let r = 0; r < this.row; r++) { // ⬇️ 从上往下遍历
+                if (this.engine.grid[r][i].tileType !== 0) {
+                    if (r !== writeRow) {
+                        // 把方块移到上面的位置
+                        this.engine.grid[writeRow][i].tileType = this.engine.grid[r][i].tileType ;
+                        this.engine.grid[writeRow][i].node = this.engine.grid[r][i].node ;
+                        this.engine.grid[r][i].tileType = 0;
+                        this.engine.grid[r][i].node = null;
+                    }
+                    writeRow++; // 目标位置向下移动
+                }
+            }
+
+
+            for (let r = writeRow; r < this.row; r++) {
+                let tile=this.engine.grid[r][i];
+                tile.tileType = this.engine.getRandomTile();        //给掉完空出来的填上值
+                tile.node= instantiate(this.gridPrefab);        //为他们赋予新节点
+                tile.node.setPosition(new Vec3((i+0.5)*this.gridSize,(this.row+r-writeRow+0.5)*this.gridSize));     //注意这里  这里应该是从上面开始的
+                tile.node.parent = this.node;
+                let spriteName="img"+tile.tileType;
+                this.loadAtlas(this.atlasPath, spriteName,tile.node);   
+
+                let move= new Move;
+                move.setData(tile.node,tile.node.position,{row:r,col:i});
+                let direct=new Vec3(0,-1,0);
+                move.setDirect(direct,len*this.gridSize);
+                remove.data.push(move);
+
+            }
+        
+        }
+    }
     private onTouchStart(event: EventTouch) {
         if (!this.engine) return;
         let worldPos = this.node.worldPosition;
@@ -87,44 +160,16 @@ export class Grid extends Component {
                     this.animationQueue.push(this.recordAnimation);
                     console.log(first.ftilePos,second.ftilePos)
                     if(this.engine.swap(first.ftilePos,second.ftilePos)){
-                        console.log("remove")
-                        let remove=new Animation;
-                        const matches = this.engine.findAllMatches();
-                        for(let i=0;i<matches.length;i++){
-                            for(let j=0;j<matches[i].tiles.length;j++){
-                                let pos=matches[i].tiles[j];
-                                let temp= new Remove;
-                                temp.node=this.engine.grid[pos.row][pos.col].node;
-                                remove.data.push(temp);
-                            }
-                        }
-                        this.animationQueue.push(remove);
+                        
+                       
+                        this.checkMatch();
+                        
+                        
 
 
-                        console.log("down")
-                        let down=new Animation;
-                        this.engine.removeMatches(matches); 
-                        //此时待消除方块已被标记为0
-                        for(let i=0;i<this.col;i++){
-                            let len=0;
-                            for(let j=0;j<this.row;j++){
-                                if(this.engine.grid[j][i].tileType==0){
-                                    len++;
-                                }else{
-                                    if(len!=0){
-                                        console.log("len",len,len*this.gridSize);
-                                        let temp= new Move;
-                                        let tile=this.engine.grid[j][i];
-                                        temp.setData(tile.node,tile.node.position,{row:j,col:i});
-                                        let direct=new Vec3(0,-1,0);
-                                        temp.setDirect(direct,len*this.gridSize);
-                                        remove.data.push(temp);
-                                    }
-                                }
-                                
-                            }
-                        }
-                        this.animationQueue.push(down);
+
+
+                        
                     }else{
 
                         //不能交换的话就得复归原位

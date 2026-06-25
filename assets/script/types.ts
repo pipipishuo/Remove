@@ -5,7 +5,7 @@ export type TileType = 0 | 1 | 2 | 3 | 4 ; // 0表示空，1-5表示不同颜色
 export type Position = { row: number; col: number };
 export class Tile{
     tileType:TileType
-    node:Node
+    node:Node=null
     constructor() {
         // 什么都没做
     }

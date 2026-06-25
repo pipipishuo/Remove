@@ -39,7 +39,7 @@ export class MatchEngine {
   /**
    * 获取随机元素
    */
-  private getRandomTile(): TileType {
+  getRandomTile(): TileType {
     const index = Math.floor(Math.random() * this.tileTypes.length);
     return this.tileTypes[index];
   }
@@ -174,23 +174,26 @@ export class MatchEngine {
   public dropDown(): boolean {
     let dropped = false;
     for (let c = 0; c < this.cols; c++) {
-      let writeRow = this.rows - 1;
-      // 从底部向上移动
-      for (let r = this.rows - 1; r >= 0; r--) {
-        if (this.grid[r][c].tileType !== 0) {
-          if (r !== writeRow) {
-            this.grid[writeRow][c] = this.grid[r][c];
-            this.grid[r][c].tileType = 0;
-            dropped = true;
-          }
-          writeRow--;
+        let writeRow = 0; // 从最顶部开始（row=0）
+        
+        // 从顶部向下遍历
+        for (let r = 0; r < this.rows; r++) { // ⬇️ 从上往下遍历
+            if (this.grid[r][c].tileType !== 0) {
+                if (r !== writeRow) {
+                    // 把方块移到上面的位置
+                    this.grid[writeRow][c] = this.grid[r][c];
+                    this.grid[r][c].tileType = 0;
+                    dropped = true;
+                }
+                writeRow++; // 目标位置向下移动
+            }
         }
-      }
-      // 填充顶部空位
-      for (let r = writeRow; r >= 0; r--) {
-        this.grid[r][c].tileType = this.getRandomTile();
-        dropped = true;
-      }
+        
+        // // 填充底部空位（从底部的空位开始填充）
+        // for (let r = writeRow; r < this.rows; r++) {
+        //     this.grid[r][c].tileType = this.getRandomTile();
+        //     dropped = true;
+        // }
     }
     return dropped;
   }
