@@ -22,7 +22,7 @@ export interface AnimationData{
     process();
     done();
 }
-export class Exchang implements AnimationData{
+export class Move implements AnimationData{
     costTime:number
     duration:number
     node:Node
@@ -30,10 +30,14 @@ export class Exchang implements AnimationData{
     direct:Vec3
     len:number
     ftilePos:Position
-    setData(node:Node,ftilePos:Position){
+    setData(node:Node,position:Vec3,ftilePos:Position){
         this.node=node;
-        this.originPos=node.position.clone();
+        this.originPos=position.clone();
         this.ftilePos=ftilePos;
+    }
+    setDirect(direct:Vec3,len:number){
+        this.len=len;
+        this.direct=direct;
     }
     setTime(costTime,duration){
         this.costTime=costTime;

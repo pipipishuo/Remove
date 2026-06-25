@@ -2,7 +2,7 @@ import { _decorator, Color, Component, EventTouch, Graphics, Input, instantiate,
 const { ccclass, property } = _decorator;
 import{MatchEngine} from './MatchEngine'
 import { Box } from './Box';
-import { Animation, AnimationData,Exchang,Position, Remove, Tile } from './types';
+import { Animation, AnimationData,Move,Position, Remove, Tile } from './types';
 enum State{
     Normal,
     firstPress,
@@ -41,12 +41,12 @@ export class Grid extends Component {
     private onTouchStart(event: EventTouch) {
         if (!this.engine) return;
         let worldPos = this.node.worldPosition;
-        console.log("世界坐标: ", worldPos.x, worldPos.y, worldPos.z);
+        
         // 获取触摸位置对应的格子
         const location = event.getUILocation();
         const pos = this.getGridPosition(location.x, location.y);
         if (!pos) return;
-        console.log("对应坐标",pos.row,pos.col);
+        
        
         
         switch (this.state){
@@ -54,8 +54,8 @@ export class Grid extends Component {
                 this.recordAnimation=new Animation;
                 
                 let tile=this.engine.grid[pos.row][pos.col];
-                let animationData=new Exchang;
-                animationData.setData(tile.node,pos)
+                let animationData=new Move;
+                animationData.setData(tile.node,tile.node.position,pos)
                 
                 this.recordAnimation.data.push(animationData);
                 this.state=State.firstPress;
@@ -65,57 +65,80 @@ export class Grid extends Component {
                 let tile=this.engine.grid[pos.row][pos.col];
                 let dPos=new Vec3(tile.node.position.x,tile.node.position.y,0);
                 let out=new Vec3();
-                let first=this.recordAnimation.data[0] as Exchang;
+                let first=this.recordAnimation.data[0] as Move;
                 out.y=pos.row-first.ftilePos.row
                 out.x=pos.col-first.ftilePos.col
                 
                 console.log("direct",out.x,out.y)
                 
                 if((out.x==1&&out.y==0)||(out.x==-1&&out.y==0)||(out.x==0&&out.y==1)||(out.x==0&&out.y==-1)){
-                    let second=new Exchang;
-                    second.setData(tile.node,pos);
+                    let second=new Move;
+                    second.setData(tile.node,tile.node.position,pos);
                     
 
-                    first.direct=out.clone();
-                    second.direct=out.clone().multiplyScalar(-1);
+                    
                     
                     let len=Math.sqrt(Math.pow(dPos.x-first.node.position.x,2)+Math.pow(dPos.y-first.node.position.y,2));;
-                    second.len=len;
-                    first.len=len;
-
+                    
+                    
+                    first.setDirect(out.clone(),len);
+                    second.setDirect(out.clone().multiplyScalar(-1),len);
                     this.recordAnimation.data.push(second);
                     this.animationQueue.push(this.recordAnimation);
                     console.log(first.ftilePos,second.ftilePos)
                     if(this.engine.swap(first.ftilePos,second.ftilePos)){
-                        console.log("match")
-                        let animation=new Animation;
-                        
+                        console.log("remove")
+                        let remove=new Animation;
                         const matches = this.engine.findAllMatches();
                         for(let i=0;i<matches.length;i++){
                             for(let j=0;j<matches[i].tiles.length;j++){
                                 let pos=matches[i].tiles[j];
                                 let temp= new Remove;
                                 temp.node=this.engine.grid[pos.row][pos.col].node;
-                                animation.data.push(temp);
+                                remove.data.push(temp);
                             }
                         }
-                        this.animationQueue.push(animation);
+                        this.animationQueue.push(remove);
+
+
+                        console.log("down")
+                        let down=new Animation;
+                        this.engine.removeMatches(matches); 
+                        //此时待消除方块已被标记为0
+                        for(let i=0;i<this.col;i++){
+                            let len=0;
+                            for(let j=0;j<this.row;j++){
+                                if(this.engine.grid[j][i].tileType==0){
+                                    len++;
+                                }else{
+                                    if(len!=0){
+                                        console.log("len",len,len*this.gridSize);
+                                        let temp= new Move;
+                                        let tile=this.engine.grid[j][i];
+                                        temp.setData(tile.node,tile.node.position,{row:j,col:i});
+                                        let direct=new Vec3(0,-1,0);
+                                        temp.setDirect(direct,len*this.gridSize);
+                                        remove.data.push(temp);
+                                    }
+                                }
+                                
+                            }
+                        }
+                        this.animationQueue.push(down);
                     }else{
 
                         //不能交换的话就得复归原位
                         this.recordAnimation=new Animation;
                         
-                        let temp= new Exchang;
-                        temp.setData(first.node,first.ftilePos)
-                        temp.direct=out.clone();
-                        temp.len=len;
-                        
+                        let temp= new Move;
+                        temp.setData(first.node,second.node.position,first.ftilePos)
+                        temp.setDirect(out.clone().multiplyScalar(-1),len);
 
                         this.recordAnimation.data.push(temp);
-                        temp= new Exchang;
-                        temp.setData(second.node,second.ftilePos)
-                        temp.direct=out.clone().multiplyScalar(-1);
-                        temp.len=len;
+                        temp= new Move;
+                        temp.setData(second.node,first.node.position,second.ftilePos)
+                        temp.setDirect(out.clone(),len);
+
                         this.recordAnimation.data.push(temp);
                         this.animationQueue.push(this.recordAnimation);
                     }
@@ -139,7 +162,7 @@ export class Grid extends Component {
     }
     getGridPosition(x:number,y:number):Position{
         let pos:Position={row:0,col:0};
-        console.log("对应坐标",x,y);
+        
         pos.row=Math.floor(y/this.gridSize);
         pos.col=Math.floor(x/this.gridSize);
         return pos;
