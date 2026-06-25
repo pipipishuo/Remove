@@ -10,19 +10,73 @@ export class Tile{
         // 什么都没做
     }
 };
-export class AnimationData{
+export enum AnimationType{
+    Normal,
+    firstPress,
+    animation
+}
+export interface AnimationData{
+    costTime:number
+    duration:number
+    setTime(costTime,duration);
+    process();
+    done();
+}
+export class Exchang implements AnimationData{
+    costTime:number
+    duration:number
     node:Node
     originPos:Vec3
     direct:Vec3
+    len:number
     ftilePos:Position
-    targetPos:Vec3
+    setData(node:Node,ftilePos:Position){
+        this.node=node;
+        this.originPos=node.position.clone();
+        this.ftilePos=ftilePos;
+    }
+    setTime(costTime,duration){
+        this.costTime=costTime;
+        this.duration=duration;
+    }
+    process(){
+        let opos=this.originPos;
+        let len=this.len;
+        let direct=this.direct;
+        let rate=this.costTime/this.duration
+        //let len=Math.sqrt(Math.pow(opos.x-tpos.x,2)+Math.pow(opos.y-tpos.y,2));
+        
+        this.node.setPosition(new Vec3(opos.x+direct.x*rate*len,opos.y+direct.y*rate*len,0));
+    }
+    done(){
+        let opos=this.originPos;
+        let len=this.len;
+        let direct=this.direct;
+        this.node.setPosition(new Vec3(opos.x+direct.x*len,opos.y+direct.y*len,0));
+    }
+}
+export class Remove implements AnimationData{
+    costTime:number
+    duration:number
+    node:Node
+    
+    setTime(costTime,duration){
+        this.costTime=costTime;
+        this.duration=duration;
+    }
+    process(){
+        this.node.destroy();
+    }
+    done(){
+        
+    }
 }
 export class Animation{
     costTime:number=0
     duration:number=0.3
     data:AnimationData[]
     constructor() {
-        // 什么都没做
+        this.data=[];
     }
 };
 export interface IBoard {

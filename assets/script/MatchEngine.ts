@@ -104,10 +104,10 @@ export class MatchEngine {
       for (let c = 0; c < this.cols - 2; c++) {
         const tile = this.grid[r][c];
         if (tile.tileType === 0) continue;
-        if (this.grid[r][c + 1] === tile && this.grid[r][c + 2] === tile) {
+        if (this.grid[r][c + 1].tileType === tile.tileType && this.grid[r][c + 2].tileType === tile.tileType) {
           const match: Position[] = [];
           let end = c + 2;
-          while (end + 1 < this.cols && this.grid[r][end + 1] === tile) {
+          while (end + 1 < this.cols && this.grid[r][end + 1].tileType === tile.tileType) {
             end++;
           }
           for (let i = c; i <= end; i++) {
@@ -129,10 +129,10 @@ export class MatchEngine {
       for (let r = 0; r < this.rows - 2; r++) {
         const tile = this.grid[r][c];
         if (tile.tileType === 0) continue;
-        if (this.grid[r + 1][c] === tile && this.grid[r + 2][c] === tile) {
+        if (this.grid[r + 1][c].tileType === tile.tileType && this.grid[r + 2][c].tileType === tile.tileType) {
           const match: Position[] = [];
           let end = r + 2;
-          while (end + 1 < this.rows && this.grid[end + 1][c] === tile) {
+          while (end + 1 < this.rows && this.grid[end + 1][c].tileType === tile.tileType) {
             end++;
           }
           for (let i = r; i <= end; i++) {
