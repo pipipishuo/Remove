@@ -21,6 +21,7 @@ export interface AnimationData{
     setTime(costTime,duration);
     process();
     done();
+    isOver():boolean;
 }
 export class Move implements AnimationData{
     costTime:number
@@ -30,6 +31,13 @@ export class Move implements AnimationData{
     direct:Vec3
     len:number
     ftilePos:Position
+    isOver(): boolean {
+        if(this.costTime>this.duration){
+            return true;        
+        }else{
+            return false;
+        }
+    }
     setData(node:Node,position:Vec3,ftilePos:Position){
         this.node=node;
         this.originPos=position.clone();
@@ -63,13 +71,17 @@ export class Remove implements AnimationData{
     costTime:number
     duration:number
     node:Node
-    
+    first:boolean=true;
+    isOver(): boolean {
+        return !this.first;
+    }
     setTime(costTime,duration){
         this.costTime=costTime;
         this.duration=duration;
     }
     process(){
         this.node.destroy();
+        this.first=false;
     }
     done(){
         

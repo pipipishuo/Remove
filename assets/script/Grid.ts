@@ -38,9 +38,12 @@ export class Grid extends Component {
         // this.node.on(Input.EventType.TOUCH_CANCEL, this.onTouchCancel, this);
     }
     private checkMatch(){
+       const matches = this.engine.findAllMatches();
+       if(matches.length==0)return;
+       this.state=State.animation
         console.log("remove")
         let remove=new Animation;
-        const matches = this.engine.findAllMatches();
+        
         for(let i=0;i<matches.length;i++){
             for(let j=0;j<matches[i].tiles.length;j++){
                 let pos=matches[i].tiles[j];
@@ -50,8 +53,6 @@ export class Grid extends Component {
             }
         }
         this.animationQueue.push(remove);
-
-
         console.log("down")
         let down=new Animation;
         this.engine.removeMatches(matches); 
@@ -69,23 +70,24 @@ export class Grid extends Component {
                         move.setData(tile.node,tile.node.position,{row:j,col:i});
                         let direct=new Vec3(0,-1,0);
                         move.setDirect(direct,len*this.gridSize);
-                        remove.data.push(move);
+                        down.data.push(move);
                     }
                 }
                 
             }
 
+            
             //落下来
             let writeRow = 0; // 从最顶部开始（row=0）
             // 从顶部向下遍历
-            for (let r = 0; r < this.row; r++) { // ⬇️ 从上往下遍历
+            for (let r = 0; r < this.row; r++) { // 
                 if (this.engine.grid[r][i].tileType !== 0) {
                     if (r !== writeRow) {
                         // 把方块移到上面的位置
                         this.engine.grid[writeRow][i].tileType = this.engine.grid[r][i].tileType ;
                         this.engine.grid[writeRow][i].node = this.engine.grid[r][i].node ;
                         this.engine.grid[r][i].tileType = 0;
-                        this.engine.grid[r][i].node = null;
+                        
                     }
                     writeRow++; // 目标位置向下移动
                 }
@@ -105,11 +107,11 @@ export class Grid extends Component {
                 move.setData(tile.node,tile.node.position,{row:r,col:i});
                 let direct=new Vec3(0,-1,0);
                 move.setDirect(direct,len*this.gridSize);
-                remove.data.push(move);
+                down.data.push(move);
 
             }
-        
         }
+        this.animationQueue.push(down);
     }
     private onTouchStart(event: EventTouch) {
         if (!this.engine) return;
@@ -314,7 +316,7 @@ export class Grid extends Component {
             for(let i=0;i<this.curAnimation.data.length;i++){
                 let animationData= this.curAnimation.data[i];
                 animationData.setTime(this.curAnimation.costTime,this.curAnimation.duration)
-                if(this.curAnimation.costTime>this.curAnimation.duration){
+                if(animationData.isOver()){
                     animationData.done();
                     continue;
                 }else{
@@ -326,8 +328,10 @@ export class Grid extends Component {
                 this.curAnimation=null;
                 if(this.animationQueue.length==0){
                     this.state=State.Normal
-                }
+                } 
             }
+        }else{
+            this.checkMatch();
         }
         
     }
