@@ -73,19 +73,30 @@ export class MatchEngine {
     const colDiff = Math.abs(pos1.col - pos2.col);
     if ((rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1)) {
       // 执行交换
-      const temp = this.grid[pos1.row][pos1.col];
-      this.grid[pos1.row][pos1.col] = this.grid[pos2.row][pos2.col];
-      this.grid[pos2.row][pos2.col] = temp;
+      const temp= new Tile;
+      temp.tileType = this.grid[pos1.row][pos1.col].tileType ;
+      temp.node = this.grid[pos1.row][pos1.col].node ;
 
+      this.grid[pos1.row][pos1.col].tileType = this.grid[pos2.row][pos2.col].tileType;
+      this.grid[pos1.row][pos1.col].node = this.grid[pos2.row][pos2.col].node;
+      
+      this.grid[pos2.row][pos2.col].tileType = temp.tileType ;
+      this.grid[pos2.row][pos2.col].node = temp.node ;
       // 检查交换后是否有匹配
       const matches = this.findAllMatches();
       if (matches.length > 0) {
         return true;
       } else {
         // 没有匹配，交换回来
-        const tempBack = this.grid[pos1.row][pos1.col];
-        this.grid[pos1.row][pos1.col] = this.grid[pos2.row][pos2.col];
-        this.grid[pos2.row][pos2.col] = tempBack;
+        const temp= new Tile;
+        temp.tileType = this.grid[pos1.row][pos1.col].tileType ;
+        temp.node = this.grid[pos1.row][pos1.col].node ;
+
+        this.grid[pos1.row][pos1.col].tileType = this.grid[pos2.row][pos2.col].tileType;
+        this.grid[pos1.row][pos1.col].node = this.grid[pos2.row][pos2.col].node;
+        
+        this.grid[pos2.row][pos2.col].tileType = temp.tileType ;
+        this.grid[pos2.row][pos2.col].node = temp.node ;
         return false;
       }
     }
