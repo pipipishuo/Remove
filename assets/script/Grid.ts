@@ -162,7 +162,7 @@ export class Grid extends Component {
                     this.animationQueue.push(this.recordAnimation);
                     console.log(first.ftilePos,second.ftilePos)
                     if(this.engine.swap(first.ftilePos,second.ftilePos)){
-                        this.checkMatch();
+                        //this.checkMatch();
                     }else{
 
                         //不能交换的话就得复归原位
