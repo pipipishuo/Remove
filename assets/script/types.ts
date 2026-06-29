@@ -69,10 +69,15 @@ export class Move implements AnimationData{
 }
 export class Remove implements AnimationData{
     costTime:number
-    duration:number
+    duration:number=2
     node:Node
     first:boolean=true;
     isOver(): boolean {
+        if(this.costTime>this.duration){
+            return true;        
+        }else{
+            return false;
+        }
         return !this.first;
     }
     setTime(costTime,duration){
@@ -80,11 +85,12 @@ export class Remove implements AnimationData{
         this.duration=duration;
     }
     process(){
-        this.node.destroy();
+        const sprite = this.node.getComponent(Sprite);
+        sprite.color=new Color(255,125,125,125);
         this.first=false;
     }
     done(){
-        
+        this.node.destroy();
     }
 }
 export class Animation{

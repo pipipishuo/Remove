@@ -43,7 +43,7 @@ export class Grid extends Component {
        this.state=State.animation
         console.log("remove")
         let remove=new Animation;
-        
+        remove.duration=1;
         for(let i=0;i<matches.length;i++){
             for(let j=0;j<matches[i].tiles.length;j++){
                 let pos=matches[i].tiles[j];
@@ -231,7 +231,7 @@ export class Grid extends Component {
                 return;
             }
 
-            console.log('✅ 图集加载成功:', atlas);
+            //console.log('✅ 图集加载成功:', atlas);
 
             // 2. 从图集中获取 SpriteFrame
             const spriteFrame = atlas.getSpriteFrame(spriteName);
@@ -242,7 +242,7 @@ export class Grid extends Component {
                 return;
             }
 
-            console.log(`✅ 成功获取 SpriteFrame: ${spriteName}`);
+            //console.log(`✅ 成功获取 SpriteFrame: ${spriteName}`);
 
             // 3. 显示到 Sprite 组件上
             this.applySpriteFrame(spriteFrame,targetNode);
@@ -262,7 +262,7 @@ export class Grid extends Component {
 
         sprite.spriteFrame = spriteFrame;
          sprite.markForUpdateRenderData();
-        console.log('✅ 图片显示成功');
+        //console.log('✅ 图片显示成功');
     }
     drawGrid() {
         const graphics = this.getComponent(Graphics);
