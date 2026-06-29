@@ -123,7 +123,8 @@ export class MatchEngine {
           }
           for (let i = c; i <= end; i++) {
             const key = `${r},${i}`;
-            if (!visited.has(key)) {
+            //if (!visited.has(key)) 
+              {
               match.push({ row: r, col: i });
               visited.add(key);
             }
@@ -148,7 +149,8 @@ export class MatchEngine {
           }
           for (let i = r; i <= end; i++) {
             const key = `${i},${c}`;
-            if (!visited.has(key)) {
+            //if (!visited.has(key)) 
+              {
               match.push({ row: i, col: c });
               visited.add(key);
             }
