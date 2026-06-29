@@ -52,6 +52,12 @@ export class Move implements AnimationData{
         this.duration=duration;
     }
     process(){
+        const pos=this.node.getPosition();
+        if(pos.y>1280){
+            this.node.active = false;
+        }else{
+            this.node.active = true;
+        }
         let opos=this.originPos;
         let len=this.len;
         let direct=this.direct;
@@ -69,7 +75,7 @@ export class Move implements AnimationData{
 }
 export class Remove implements AnimationData{
     costTime:number
-    duration:number=2
+    duration:number
     node:Node
     first:boolean=true;
     isOver(): boolean {
@@ -95,7 +101,7 @@ export class Remove implements AnimationData{
 }
 export class Animation{
     costTime:number=0
-    duration:number=0.3
+    duration:number
     data:AnimationData[]
     constructor() {
         this.data=[];

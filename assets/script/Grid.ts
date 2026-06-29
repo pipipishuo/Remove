@@ -24,6 +24,8 @@ export class Grid extends Component {
     firstTile:Tile;
     secondTile:Tile;
     recordAnimation:Animation=null;
+    exchangeDuration:number=0.3
+    downDuration:number=0.6
     start() {
         this.animationQueue = [];
         this.drawGrid();
@@ -43,7 +45,7 @@ export class Grid extends Component {
        this.state=State.animation
         console.log("remove")
         let remove=new Animation;
-        remove.duration=1;
+        remove.duration=0.6;
         for(let i=0;i<matches.length;i++){
             for(let j=0;j<matches[i].tiles.length;j++){
                 let pos=matches[i].tiles[j];
@@ -55,6 +57,7 @@ export class Grid extends Component {
         this.animationQueue.push(remove);
         console.log("down")
         let down=new Animation;
+        down.duration=this.downDuration;
         this.engine.removeMatches(matches); 
         //此时待消除方块已被标记为0
         for(let i=0;i<this.col;i++){
@@ -98,7 +101,9 @@ export class Grid extends Component {
                 let tile=this.engine.grid[r][i];
                 tile.tileType = this.engine.getRandomTile();        //给掉完空出来的填上值
                 tile.node= instantiate(this.gridPrefab);        //为他们赋予新节点
+                console.log("top box y",(this.row+r-writeRow+0.5)*this.gridSize);
                 tile.node.setPosition(new Vec3((i+0.5)*this.gridSize,(this.row+r-writeRow+0.5)*this.gridSize));     //注意这里  这里应该是从上面开始的
+                tile.node.active=false;
                 tile.node.parent = this.node;
                 let spriteName="img"+tile.tileType;
                 this.loadAtlas(this.atlasPath, spriteName,tile.node);   
@@ -127,9 +132,10 @@ export class Grid extends Component {
         switch (this.state){
             case State.Normal:{
                 this.recordAnimation=new Animation;
-                
+                this.recordAnimation.duration=this.exchangeDuration;
                 let tile=this.engine.grid[pos.row][pos.col];
                 let animationData=new Move;
+                
                 animationData.setData(tile.node,tile.node.position,pos)
                 
                 this.recordAnimation.data.push(animationData);
@@ -149,7 +155,7 @@ export class Grid extends Component {
                 if((out.x==1&&out.y==0)||(out.x==-1&&out.y==0)||(out.x==0&&out.y==1)||(out.x==0&&out.y==-1)){
                     let second=new Move;
                     second.setData(tile.node,tile.node.position,pos);
-                    
+                   
 
                     
                     
@@ -167,13 +173,15 @@ export class Grid extends Component {
 
                         //不能交换的话就得复归原位
                         this.recordAnimation=new Animation;
-                        
+                        this.recordAnimation.duration=this.exchangeDuration;
                         let temp= new Move;
+                        
                         temp.setData(first.node,second.node.position,first.ftilePos)
                         temp.setDirect(out.clone().multiplyScalar(-1),len);
 
                         this.recordAnimation.data.push(temp);
                         temp= new Move;
+                       
                         temp.setData(second.node,first.node.position,second.ftilePos)
                         temp.setDirect(out.clone(),len);
 
