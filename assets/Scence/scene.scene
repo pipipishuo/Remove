@@ -23,7 +23,7 @@
     "_active": true,
     "_components": [],
     "_prefab": {
-      "__id__": 17
+      "__id__": 20
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -54,7 +54,7 @@
     },
     "autoReleaseAssets": false,
     "_globals": {
-      "__id__": 18
+      "__id__": 21
     },
     "_id": "9a32afa7-0c00-490e-ae56-b5512632542e"
   },
@@ -75,18 +75,21 @@
       },
       {
         "__id__": 9
+      },
+      {
+        "__id__": 14
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 14
+        "__id__": 17
       },
       {
-        "__id__": 15
+        "__id__": 18
       },
       {
-        "__id__": 16
+        "__id__": 19
       }
     ],
     "_prefab": null,
@@ -298,9 +301,9 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 67,
-      "g": 109,
-      "b": 218,
+      "r": 32,
+      "g": 157,
+      "b": 240,
       "a": 255
     },
     "_spriteFrame": {
@@ -373,14 +376,14 @@
         "__id__": 12
       },
       {
-        "__id__": 13
+        "__id__": 16
       }
     ],
     "_prefab": null,
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -360,
-      "y": -640,
+      "x": -347.487,
+      "y": -623.165,
       "z": 0
     },
     "_lrot": {
@@ -478,11 +481,103 @@
     },
     "_enabled": true,
     "__prefab": null,
+    "audioSource": {
+      "__id__": 13
+    },
     "gridPrefab": {
       "__uuid__": "dc7d537d-5dd5-4a99-939b-4489b24be08a",
       "__expectedType__": "cc.Prefab"
     },
     "_id": "e79ofFXo1EEbVOZlw2zTEf"
+  },
+  {
+    "__type__": "cc.AudioSource",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 14
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_clip": {
+      "__uuid__": "079720fc-8c14-4586-ba93-5832c28fc6f7",
+      "__expectedType__": "cc.AudioClip"
+    },
+    "_loop": false,
+    "_playOnAwake": false,
+    "_volume": 1,
+    "_id": "36TCodC6ZNNIhZejyWSq+W"
+  },
+  {
+    "__type__": "cc.Node",
+    "_name": "RemoveAudio",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "_parent": {
+      "__id__": 2
+    },
+    "_children": [],
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 15
+      },
+      {
+        "__id__": 13
+      }
+    ],
+    "_prefab": null,
+    "_lpos": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_lrot": {
+      "__type__": "cc.Quat",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 1
+    },
+    "_lscale": {
+      "__type__": "cc.Vec3",
+      "x": 1,
+      "y": 1,
+      "z": 1
+    },
+    "_mobility": 0,
+    "_layer": 33554432,
+    "_euler": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_id": "19qXTyS+xDG7HLm4vzQoNd"
+  },
+  {
+    "__type__": "cc.UITransform",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 14
+    },
+    "_enabled": true,
+    "__prefab": null,
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 100,
+      "height": 100
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_id": "c6USONzvRCzJo9m7q27o2Q"
   },
   {
     "__type__": "cc.Widget",
@@ -497,9 +592,9 @@
     "_alignFlags": 36,
     "_target": null,
     "_left": 0,
-    "_right": 0,
+    "_right": -12.512999999999977,
     "_top": 0,
-    "_bottom": -1280,
+    "_bottom": -1263.165,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
     "_isAbsLeft": true,
@@ -593,28 +688,28 @@
   {
     "__type__": "cc.SceneGlobals",
     "ambient": {
-      "__id__": 19
-    },
-    "shadows": {
-      "__id__": 20
-    },
-    "_skybox": {
-      "__id__": 21
-    },
-    "fog": {
       "__id__": 22
     },
-    "octree": {
+    "shadows": {
       "__id__": 23
     },
-    "skin": {
+    "_skybox": {
       "__id__": 24
     },
-    "lightProbeInfo": {
+    "fog": {
       "__id__": 25
     },
-    "postSettings": {
+    "octree": {
       "__id__": 26
+    },
+    "skin": {
+      "__id__": 27
+    },
+    "lightProbeInfo": {
+      "__id__": 28
+    },
+    "postSettings": {
+      "__id__": 29
     },
     "bakedWithStationaryMainLight": false,
     "bakedWithHighpLightmap": false

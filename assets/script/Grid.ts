@@ -1,4 +1,4 @@
-import { _decorator, Color, Component, EventTouch, Graphics, Input, instantiate, Node, Prefab, resources, Sprite, SpriteAtlas, SpriteFrame, UITransform, Vec2, Vec3 } from 'cc';
+import { _decorator, AudioSource, Color, Component, EventTouch, Graphics, Input, instantiate, Node, Prefab, resources, Sprite, SpriteAtlas, SpriteFrame, UITransform, Vec2, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 import{MatchEngine} from './MatchEngine'
 import { Box } from './Box';
@@ -10,6 +10,8 @@ enum State{
 }
 @ccclass('Grid')
 export class Grid extends Component {
+     @property(AudioSource)
+    public audioSource: AudioSource = null!;
     atlasPath: string = 'ui/img'; // 必须是字符串路径
     spriteName: string = 'img3'; // 要获取的图片名称
     row:number=0;
@@ -26,6 +28,7 @@ export class Grid extends Component {
     recordAnimation:Animation=null;
     exchangeDuration:number=0.3
     downDuration:number=0.6
+    
     start() {
         this.animationQueue = [];
         this.drawGrid();
@@ -42,6 +45,7 @@ export class Grid extends Component {
     private checkMatch(){
        const matches = this.engine.findAllMatches();
        if(matches.length==0)return;
+       this.audioSource.play();
        this.state=State.animation
         console.log("remove")
         let remove=new Animation;
@@ -118,6 +122,30 @@ export class Grid extends Component {
         }
         this.animationQueue.push(down);
     }
+    private selectNode(node:Node){
+        //let node=pnode.children[0];
+        let position=node.getPosition()
+        node.setPosition(new Vec3(position.x,position.y+6,position.z));
+        // let graphic=node.getComponent(Graphics);
+        // if(!graphic)return;
+        // graphic.lineWidth = 4;
+        // graphic.strokeColor = new Color(255, 0, 0, 255); // 半透明白色
+        // graphic.moveTo(0, 0);
+        // graphic.lineTo(25, 25);
+        // graphic.stroke();
+    }
+    private unselectNode(node:Node){
+        //let node=pnode.children[0];
+        let position=node.getPosition()
+        node.setPosition(new Vec3(position.x,position.y-6,position.z));
+        // let graphic=node.getComponent(Graphics);
+        // if(!graphic)return;
+        // graphic.lineWidth = 4;
+        // graphic.strokeColor = new Color(255, 0, 0, 255); // 半透明白色
+        // graphic.moveTo(0, 0);
+        // graphic.lineTo(25, 25);
+        // graphic.stroke();
+    }
     private onTouchStart(event: EventTouch) {
         if (!this.engine) return;
         let worldPos = this.node.worldPosition;
@@ -140,6 +168,8 @@ export class Grid extends Component {
                 
                 this.recordAnimation.data.push(animationData);
                 this.state=State.firstPress;
+
+                this.selectNode(tile.node);
                 break;
             }
             case State.firstPress:{
@@ -149,7 +179,7 @@ export class Grid extends Component {
                 let first=this.recordAnimation.data[0] as Move;
                 out.y=pos.row-first.ftilePos.row
                 out.x=pos.col-first.ftilePos.col
-                
+                this.unselectNode(first.node);
                 console.log("direct",out.x,out.y)
                 
                 if((out.x==1&&out.y==0)||(out.x==-1&&out.y==0)||(out.x==0&&out.y==1)||(out.x==0&&out.y==-1)){
@@ -288,7 +318,7 @@ export class Grid extends Component {
         // 2. 设置线条样式
         graphics.lineWidth = 4;
         graphics.strokeColor = new Color(255, 0, 0, 255); // 半透明白色
-
+        return;
         // 3. 绘制竖线
         // 从 ( -width/2 ) 到 ( width/2 ) 循环
         for (let x = 0; x <=this.col; x ++ ) {
