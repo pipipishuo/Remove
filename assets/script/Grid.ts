@@ -16,7 +16,7 @@ export class Grid extends Component {
     spriteName: string = 'img3'; // 要获取的图片名称
     row:number=0;
     col:number=0;
-    gridSize: number = 50; // 每个格子的尺寸
+    gridSize: number = 120; // 每个格子的尺寸
     @property(Prefab)
     gridPrefab: Prefab = null; // 在编辑器中拖入预制体
     engine:MatchEngine=null;
@@ -49,7 +49,7 @@ export class Grid extends Component {
        this.state=State.animation
         console.log("remove")
         let remove=new Animation;
-        remove.duration=0.6;
+        remove.duration=0.3;
         for(let i=0;i<matches.length;i++){
             for(let j=0;j<matches[i].tiles.length;j++){
                 let pos=matches[i].tiles[j];
@@ -148,11 +148,14 @@ export class Grid extends Component {
     }
     private onTouchStart(event: EventTouch) {
         if (!this.engine) return;
-        let worldPos = this.node.worldPosition;
+        
+        const selfPos = this.node.worldPosition;
+         
         
         // 获取触摸位置对应的格子
         const location = event.getUILocation();
-        const pos = this.getGridPosition(location.x, location.y);
+        const pos = this.getGridPosition(location.x-selfPos.x, location.y-selfPos.y);
+        
         if (!pos) return;
         
        
